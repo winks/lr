@@ -64,6 +64,7 @@ static int Uflag;
 static int hflag;
 static int lflag;
 static int sflag;
+static int vflag;
 static int xflag;
 
 static char *argv0;
@@ -168,6 +169,10 @@ struct expr {
 };
 
 static char *pos;
+
+char version_string[] = {
+#include "version.h"
+};
 
 static void
 parse_error(const char *msg)
@@ -1252,7 +1257,7 @@ main(int argc, char *argv[])
 	ordering = default_ordering;
 	argv0 = argv[0];
 
-	while ((c = getopt(argc, argv, "01ADFHLQUdf:lho:st:x")) != -1)
+	while ((c = getopt(argc, argv, "01ADFHLQUdf:lho:st:xv")) != -1)
 		switch(c) {
 		case '0': format = zero_format; Qflag++; break;
 		case '1': expr = chain(expr, EXPR_AND, parse_expr("depth == 0 || prune")); break;
@@ -1270,11 +1275,17 @@ main(int argc, char *argv[])
 		case 'o': ordering = optarg; break;
 		case 's': sflag++; break;
 		case 't': expr = chain(expr, EXPR_AND, parse_expr(optarg)); break;
+		case 'v': vflag++; break;
 		case 'x': xflag++; break;
 		default:
 			fprintf(stderr, "Usage: %s [-0|-F|-l|-f FMT] [-D] [-H|-L] [-1AQdhsx] [-U|-o ORD] [-t TEST]* PATH...\n", argv0);
 			exit(2);
 		}
+
+	if (vflag) {
+		fprintf(stdout, "Version: git-%s\n", version_string);
+		exit(0);
+	}
 
 	if (optind == argc) {
 		sflag++;
